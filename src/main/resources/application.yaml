@@ -4,9 +4,19 @@ server:
 spring:
   application:
     name: rate-limiter-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: test_route
+          uri: https://httpbin.org
+          predicates:
+            - Path=/anything/**
 
 management:
   endpoints:
     web:
       exposure:
         include: health, info
+
+jwt:
+  secret: "dev-only-secret-change-this-before-production-9f4a7c2e8b1d6f3a"
