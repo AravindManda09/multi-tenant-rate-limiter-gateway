@@ -4,13 +4,29 @@ server:
 spring:
   application:
     name: rate-limiter-gateway
+  data:
+    redis:
+      host: localhost
+      port: 6379
   cloud:
     gateway:
-      routes:
-        - id: test_route
-          uri: https://httpbin.org
-          predicates:
-            - Path=/anything/**
+      server:
+        webflux:
+          routes:
+            - id: test-route
+              uri: https://httpbin.org
+              predicates:
+                - Path=/test/**
+              filters:
+                - RewritePath=/test/(?<segment>.*), /${segment}
+
+app:
+  rate-limit:
+    window-ms: 60000
+    tiers:
+      FREE: 60
+      PRO: 500
+      ENTERPRISE: 5000
 
 management:
   endpoints:
@@ -18,5 +34,6 @@ management:
       exposure:
         include: health, info
 
+
 jwt:
-  secret: "dev-only-secret-change-this-before-production-9f4a7c2e8b1d6f3a"
+  secret: ${JWT_SECRET:dev-only-secret-change-this-before-production-9f4a7c2e8b1d6f3a}

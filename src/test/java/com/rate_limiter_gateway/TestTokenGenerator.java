@@ -22,7 +22,7 @@ public class TestTokenGenerator {
                 Jwts.builder()
                         .subject("test-user")
                         .claim("tenant_id", "tenant-456")
-                        .claim("tier", "PRO")
+                        .claim("tier", "FREE")
                         .issuedAt(new Date())
                         .expiration(
                                 new Date(
