@@ -1,0 +1,47 @@
+services:
+  # 1. Your Java API Gateway
+  api-gateway:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      # Tell Spring to connect to the 'redis' container instead of localhost
+      - SPRING_DATA_REDIS_HOST=redis
+      - JWT_SECRET=dev-only-secret-change-this-before-production-9f4a7c2e8b1d6f3a
+    depends_on:
+      - redis
+      - mock-service
+
+  # 2. Redis for the Rate Limiter
+  redis:
+    image: redis:8-alpine
+    ports:
+      - "6379:6379"
+
+  # 3. The Node.js Mock Service
+  mock-service:
+    build: ./mock-service
+    ports:
+      - "9000:9000"
+    environment:
+      - PORT=9000
+      - ERROR_RATE=0
+      - DELAY_MS=0
+
+  # 4. Prometheus (Metrics Time-Series Database)
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      # Mount the config file we just created into the container
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
+  # 5. Grafana (Metrics Visualization Dashboard)
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      # Set a default admin password so it doesn't prompt you to change it
+      - GF_SECURITY_ADMIN_PASSWORD=admin
