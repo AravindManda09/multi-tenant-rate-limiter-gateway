@@ -2,6 +2,8 @@ package com.rate_limiter_gateway.filter;
 
 import com.rate_limiter_gateway.config.TierLimitResolver;
 import com.rate_limiter_gateway.security.TenantContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -19,6 +21,8 @@ import java.util.List;
 
 @Component
 public class RateLimiterFilter implements GlobalFilter, Ordered {
+
+    private static final Logger log = LoggerFactory.getLogger(RateLimiterFilter.class);
 
     private final ReactiveStringRedisTemplate redisTemplate;
     private final RedisScript<List> rateLimitScript;
@@ -61,7 +65,6 @@ public class RateLimiterFilter implements GlobalFilter, Ordered {
         return redisTemplate.execute(rateLimitScript, keys, args)
                 .next()
                 .flatMap(result -> {
-                    // Result list: [allowed (0 or 1), remaining]
                     long allowed = ((Number) result.get(0)).longValue();
                     long remaining = ((Number) result.get(1)).longValue();
 
@@ -77,6 +80,14 @@ public class RateLimiterFilter implements GlobalFilter, Ordered {
                         DataBuffer buffer = exchange.getResponse().bufferFactory().wrap(bytes);
                         return exchange.getResponse().writeWith(Mono.just(buffer));
                     }
+                })
+                .onErrorResume(ex -> {
+                    log.error(
+                            "Redis unavailable, rate limiting disabled — failing open for tenant '{}' (tier: {}): {}",
+                            tenantId, tier, ex.getMessage()
+                    );
+                    exchange.getResponse().getHeaders().add("X-RateLimit-Status", "unavailable");
+                    return chain.filter(exchange);
                 });
     }
 

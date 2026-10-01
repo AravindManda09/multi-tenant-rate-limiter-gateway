@@ -19,6 +19,10 @@ spring:
                 - Path=/test/**
               filters:
                 - RewritePath=/test/(?<segment>.*), /${segment}
+                - name: CircuitBreaker
+                  args:
+                    name: downstreamCB
+                    fallbackUri: forward:/fallback
 
 app:
   rate-limit:
@@ -37,3 +41,18 @@ management:
 
 jwt:
   secret: ${JWT_SECRET:dev-only-secret-change-this-before-production-9f4a7c2e8b1d6f3a}
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      downstreamCB:
+        failure-rate-threshold: 50
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+  timelimiter:
+    instances:
+      downstreamCB:
+        timeout-duration: 3s
