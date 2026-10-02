@@ -4,6 +4,20 @@
 
 A production-grade, non-blocking API Gateway built with **Spring Cloud Gateway** and **WebFlux**. This project acts as a central ingress point for downstream microservices, providing JWT-based authentication, distributed sliding-window rate limiting via Redis, and cascading failure protection via Resilience4j circuit breakers.
 
+## 🚀 Technical Highlights & Features
+
+* **Reactive & Non-Blocking Architecture:** Built on **Spring Cloud Gateway** and **WebFlux** (Netty) to handle massive concurrency without thread exhaustion, sustaining **4,800+ RPS** in benchmark tests.
+* **Distributed Rate Limiting:** Implemented a multi-tenant Sliding Window Log algorithm using atomic **Redis Lua scripts**, strictly enforcing API quotas (`FREE`, `PRO`, `ENTERPRISE`) with zero race conditions.
+* **Cascading Failure Protection:** Integrated **Resilience4j** Circuit Breakers to detect lagging downstream services, instantly serving `503` fallbacks to protect the gateway from resource exhaustion.
+* **Stateless JWT Security:** Secured via HMAC-SHA signed Bearer tokens. A custom `GlobalFilter` cryptographically validates tokens and injects tenant identity into the reactive exchange context.
+* **Fail-Open Design:** Engineered the Redis connection with reactive `onErrorResume` fallbacks. If the rate-limiting database goes down, the gateway gracefully fails open to keep mission-critical traffic flowing.
+* **High-Fidelity Testing (98% Coverage):** Achieved **98% instruction coverage** (JaCoCo) utilizing **JUnit5** and **Mockito** for unit tests, and **Testcontainers** to validate Lua scripts against a real Dockerized Redis instance.
+* **Full-Stack DevOps & Cloud:**
+    * Fully containerized using a multi-stage `Dockerfile` and `docker-compose`.
+    * Monitored in real-time with **Micrometer, Prometheus, and Grafana**.
+    * Automated via **GitHub Actions** (CI pipeline for build, test, and lint).
+    * Deployed live to an **AWS EC2** instance.
+
 ## ✨ Key Features
 
 * **Reactive & Non-Blocking**: Built on Spring WebFlux and Netty to handle thousands of concurrent connections without thread exhaustion.
