@@ -1,7 +1,19 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { Rate } from 'k6/metrics';
-
+/*
+ * NOTE ON VIRTUAL USERS (VUs):
+ *
+ * The settings below are tuned for a live demo against an AWS EC2 t3.micro (Free Tier) instance.
+ *
+ * For local benchmarking (which generated the 4,800 RPS and 1M+ requests over 3.5m metrics),
+ * the stages were configured for high concurrency:
+ *   { duration: '30s', target: 50 },
+ *   { duration: '1m', target: 500 },
+ *   { duration: '1m', target: 1000 },
+ *   { duration: '30s', target: 1000 },
+ *   { duration: '30s', target: 0 }
+ */
 const successRate = new Rate('success_rate_200');
 const rateLimitedRate = new Rate('rate_limited_429');
 
