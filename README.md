@@ -1,3 +1,5 @@
+![CI](https://github.com/AravindManda09/multi-tenant-rate-limiter-gateway/actions/workflows/ci.yml/badge.svg)
+
 # 🚀 Multi-Tenant Reactive API Gateway
 
 A production-grade, non-blocking API Gateway built with **Spring Cloud Gateway** and **WebFlux**. This project acts as a central ingress point for downstream microservices, providing JWT-based authentication, distributed sliding-window rate limiting via Redis, and cascading failure protection via Resilience4j circuit breakers.
